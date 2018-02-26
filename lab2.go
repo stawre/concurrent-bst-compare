@@ -183,7 +183,7 @@ func main() {
 
 	/* Thread pool implementation */
 	// for i := 0; i < *hashWorkers; i++ {
-	// 	go worker()
+	// 	go hashFunc(trees[i], &tree_hashes[i], &wg)
 	// }
 
 	for i := 0; i < tree_size; i++ {
