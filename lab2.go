@@ -215,15 +215,16 @@ func main() {
 	}
 
 	c2 := 0
-	for i := 0; i < *hashWorkers; i++ {
+	for i := 0; i < 1; i++ {
 		partition := trees_partitions[i]
-		go func() {
+		// go func() {
 			for j := 0; j < q; j++ {
+				fmt.Println(i)
 				wg.Add(1)
 				hashFunc(partition[j], &tree_hashes[c2], &wg)
 				c2++;
 			}
-		}()
+		// }()
 	}
 
 	wg.Wait()
