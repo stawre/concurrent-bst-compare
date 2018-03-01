@@ -223,7 +223,7 @@ func main() {
 				hashFunc(trees_partitions[i][j], &tree_hashes[c2], &wg)
 				c2++;
 			}
-		}()
+		}(partition)
 	}
 
 	wg.Wait()
