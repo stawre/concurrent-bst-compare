@@ -194,7 +194,7 @@ func main() {
 	// }
 
 	q := tree_size / *hashWorkers
-	r := tree_size % *hashWorkers
+	// r := tree_size % *hashWorkers
 
 	trees_partitions := make([][][]int, *hashWorkers)
 	for i := range trees_partitions {
@@ -217,13 +217,13 @@ func main() {
 	c2 := 0
 	for i := 0; i < *hashWorkers; i++ {
 		partition := trees_partitions[i]
-		go func(partition interface{}) {
+		go func() {
 			for j := 0; j < q; j++ {
 				wg.Add(1)
-				hashFunc(trees_partitions[i][j], &tree_hashes[c2], &wg)
+				hashFunc(partition[j], &tree_hashes[c2], &wg)
 				c2++;
 			}
-		}(partition)
+		}()
 	}
 
 	wg.Wait()
