@@ -92,19 +92,23 @@ func hashFunc(tree []int, hashI *uint64, wg *sync.WaitGroup) {
 
 	*hashI = retval
 
-	wg.Done()
+//	wg.Done()
 }
 
 func parallelHashFunc(partition [][]int, tree_hash *uint64, q int, wg *sync.WaitGroup, i int) {
+	fmt.Println(q)
 	for j := 0; j < q; j++ {
-		fmt.Println(i)
+		fmt.Println(i, j)
 		wg.Add(1)
-		hashFunc(partition[j], tree_hash, wg)
-
+		hashFunc(partition[j], tree_hash)
+		if (j == q - 1) {
+			wg.Done()
+		}
 	}
 }
 
 func compareTrees(tree1 []int, tree2 []int) bool {
+
 	size := len(tree1)
 	for i := 0; i < size; i++ {
 		if (tree1[i] != tree2[i]) {
@@ -183,19 +187,21 @@ func main() {
 		equality[i] = make([]bool, tree_size)
 	}
 
-	// for i := 0; i < tree_size; i++ {
-	// 	wg.Add(1)
-	// 	go hashFunc(trees[i], &tree_hashes[i], &wg)
-	// }
+//	for i := 0; i < tree_size; i++ {
+//		wg.Add(1)
+//		go 
+//		hashFunc(trees[i], &tree_hashes[i], &wg)
+	}
 
 	// wg.Wait()
 
 	/* Thread pool implementation */
-	// for i := 0; i < *hashWorkers; i++ {
-	// 	go parallelHashFunc(trees[i], &tree_hashes[i], &wg)
-	// }
+	//for i := 0; i < *hashWorkers; i++ {
+	//	go hashFunc(trees[i], &tree_hashes[i], &wg)
+	//}
 
 	q := tree_size / *hashWorkers
+	fmt.Println(q)
 	// r := tree_size % *hashWorkers
 
 	trees_partitions := make([][][]int, *hashWorkers)
@@ -215,6 +221,7 @@ func main() {
 			counter++
 		}
 	}
+	start1 := time.Now()
 
 	c2 := 0
 	for i := 0; i < *hashWorkers; i++ {
@@ -224,7 +231,7 @@ func main() {
 	}
 
 	wg.Wait()
-
+	elapsed1 := time.Since(start1)
 	for i := 0; i < tree_size; i++ {
 		for j := 0; j < tree_size; j++ {
 			if (tree_hashes[i] == tree_hashes[j]) {
@@ -242,5 +249,5 @@ func main() {
 	// 	fmt.Println(equality[i])
 	// }
 
-	fmt.Printf("Time taken: %s\n", elapsed)
+	fmt.Printf("Time taken by 1: %s, Time taken by 2: %s\n", elapsed1, elapsed)
 }
