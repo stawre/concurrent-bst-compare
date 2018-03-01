@@ -196,7 +196,7 @@ func main() {
 	q := tree_size / *hashWorkers
 	r := tree_size % *hashWorkers
 
-	trees_partitions := make([][][]int, hashWorkers)
+	trees_partitions := make([][][]int, *hashWorkers)
 	for i := range trees_partitions {
 		trees_partitions[i] = make([][]int, q)
 		for j := range trees_partitions[i] {
@@ -221,7 +221,7 @@ func main() {
 				hashFunc(trees_partitions[i][j], &tree_hashes[c2])
 				c2++;
 			}
-		}
+		}()
 	}
 
 	for i := 0; i < tree_size; i++ {
