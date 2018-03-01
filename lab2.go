@@ -181,12 +181,12 @@ func main() {
 		equality[i] = make([]bool, tree_size)
 	}
 
-	for i := 0; i < tree_size; i++ {
-		wg.Add(1)
-		go hashFunc(trees[i], &tree_hashes[i], &wg)
-	}
+	// for i := 0; i < tree_size; i++ {
+	// 	wg.Add(1)
+	// 	go hashFunc(trees[i], &tree_hashes[i], &wg)
+	// }
 
-	wg.Wait()
+	// wg.Wait()
 
 	/* Thread pool implementation */
 	// for i := 0; i < *hashWorkers; i++ {
@@ -216,13 +216,17 @@ func main() {
 
 	c2 := 0
 	for i := 0; i < *hashWorkers; i++ {
-		go func(trees_partitions[i] interface{}) {
+		partition := trees_partitions[i]
+		go func(partition interface{}) {
 			for j := 0; j < q; j++ {
-				hashFunc(trees_partitions[i][j], &tree_hashes[c2])
+				wg.Add(1)
+				hashFunc(trees_partitions[i][j], &tree_hashes[c2], &wg)
 				c2++;
 			}
 		}()
 	}
+
+	wg.Wait()
 
 	for i := 0; i < tree_size; i++ {
 		for j := 0; j < tree_size; j++ {
