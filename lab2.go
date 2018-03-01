@@ -18,6 +18,14 @@ type node struct {
 	right *node
 }
 
+type map_element struct {
+	hash uint64
+	bst_id int
+}
+
+// var mux sync.Mutex
+// var hash_map = make(map[uint64][]int)
+
 func nodeConstruct(value int) *node {
 	my_node := new(node)
 	my_node.value = value
@@ -83,7 +91,8 @@ func hash(hash uint64, val int) uint64 {
 	return (hash * uint64(val2) + uint64(val2)) % prime
 }
 
-func hashFunc(tree []int, hashI *uint64, wg *sync.WaitGroup) {
+// func hashFunc(tree []int, my_chan *chan map_element, bst_id int) {
+func hashFunc(tree []int, hashI *uint64) {
 	var retval uint64 = 0
 	tree_len := len(tree)
 	for i := 0; i < tree_len; i++ {
@@ -92,14 +101,24 @@ func hashFunc(tree []int, hashI *uint64, wg *sync.WaitGroup) {
 
 	*hashI = retval
 
-//	wg.Done()
+	// *my_chan <- map_element{hash: retval, bst_id: bst_id}
+	// mux.Lock()
+	// hash_map[retval] = append(hash_map[retval], bst_id)
+	// mux.Unlock()
+
+	// wg.Done()
 }
 
-func parallelHashFunc(partition [][]int, tree_hash *uint64, q int, wg *sync.WaitGroup, i int) {
-	fmt.Println(q)
+func parallelHashFunc(partition [][]int, q int, tree_hash *uint64, wg *sync.WaitGroup,) {
+// func parallelHashFunc(partition [][]int, q int, wg *sync.WaitGroup, i int) {
+
+	// fmt.Println(q)
 	for j := 0; j < q; j++ {
-		fmt.Println(i, j)
-		wg.Add(1)
+		// fmt.Println(i, j)
+		// wg.Add(1)
+
+		// bst_id := q*i + j
+
 		hashFunc(partition[j], tree_hash)
 		if (j == q - 1) {
 			wg.Done()
@@ -187,22 +206,21 @@ func main() {
 		equality[i] = make([]bool, tree_size)
 	}
 
-//	for i := 0; i < tree_size; i++ {
-//		wg.Add(1)
-//		go 
-//		hashFunc(trees[i], &tree_hashes[i], &wg)
-	}
+	// for i := 0; i < tree_size; i++ {
+	// 	wg.Add(1)
+	// 	go hashFunc(trees[i], &tree_hashes[i], &wg)
+	// }
 
 	// wg.Wait()
 
 	/* Thread pool implementation */
-	//for i := 0; i < *hashWorkers; i++ {
-	//	go hashFunc(trees[i], &tree_hashes[i], &wg)
-	//}
+	// for i := 0; i < *hashWorkers; i++ {
+	//	 go hashFunc(trees[i], &tree_hashes[i], &wg)
+	// }
 
 	q := tree_size / *hashWorkers
-	fmt.Println(q)
-	// r := tree_size % *hashWorkers
+	// fmt.Println(q)
+	r := tree_size % *hashWorkers
 
 	trees_partitions := make([][][]int, *hashWorkers)
 	for i := range trees_partitions {
@@ -221,17 +239,37 @@ func main() {
 			counter++
 		}
 	}
-	start1 := time.Now()
+
+	for i := 0; i < r; i++ {
+		trees_partitions[i] = append(trees_partitions[i], trees[counter])
+		counter++
+	}
+
+	// start1 := time.Now()
+
+	// my_chan := make(chan map_element)
 
 	c2 := 0
 	for i := 0; i < *hashWorkers; i++ {
 		partition := trees_partitions[i]
-		go parallelHashFunc(partition, &tree_hashes[c2], q, &wg, i)
+		wg.Add(1)
+		go parallelHashFunc(partition, q, &tree_hashes[i], &wg)
+		// go parallelHashFunc(partition, q, &wg, i)
 		c2++
 	}
 
+	// elapsed1 := time.Since(start1)
+
 	wg.Wait()
-	elapsed1 := time.Since(start1)
+
+	// hash_map := make(map[uint64][]int)
+
+	//  go func (my_chan chan map_element){
+	//  	for my_element := range my_chan {
+	//  		hash_map[my_element.hash] = append(hash_map[my_element.hash], my_element.bst_id)
+	//  	}
+	//  }(my_chan) 
+
 	for i := 0; i < tree_size; i++ {
 		for j := 0; j < tree_size; j++ {
 			if (tree_hashes[i] == tree_hashes[j]) {
@@ -243,11 +281,39 @@ func main() {
 		}
 	}
 
+	// for elem := range hash_map {
+	// 	temp := hash_map[elem]
+	// 	n := len(temp)
+	// 	if (n > 1) {
+	// 		for id := range temp {
+	// 			for id2 := range temp {
+	// 				equality[id][id2] = true
+	// 			}
+	// 		}
+	// 	} else {
+	// 		 equality[temp[0]][temp[0]] = true
+	// 	}
+	// }
+
+	// for i := 0; i < tree_size; i++ {
+	// 	for j := 0; j < tree_size; j++ {
+	// 		if (equality[i][j]) {
+	// 			if compareTrees(inOrderTrees[i], inOrderTrees[j]) {
+	// 				tree_map[i] = append(tree_map[i], j)
+	// 			}
+	// 		}
+	// 	}
+	// }
+
+
+
 	elapsed := time.Since(start)
 
 	// for i := 0; i < 10; i++ {
 	// 	fmt.Println(equality[i])
 	// }
 
-	fmt.Printf("Time taken by 1: %s, Time taken by 2: %s\n", elapsed1, elapsed)
+	// fmt.Printf("Time taken by 1: %s, Time taken by 2: %s\n", elapsed1, elapsed)
+	fmt.Printf("Time taken by 1: %s", elapsed)
+
 }
