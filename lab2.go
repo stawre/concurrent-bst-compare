@@ -200,7 +200,7 @@ func main() {
 	for i := range trees_partitions {
 		trees_partitions[i] = make([][]int, q)
 		for j := range trees_partitions[i] {
-			trees_partitions[i][j] = make([]int, len(trees[0]))
+			trees_partitions[i][j] = make([]int, tree_dim)
 		}
 	}
 
