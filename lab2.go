@@ -95,11 +95,13 @@ func hashFunc(tree []int, hashI *uint64, wg *sync.WaitGroup) {
 	wg.Done()
 }
 
-func parallelHashFunc(trees [][]int, tree_hashes []uint64, q int, r int, hashWorkers int) {
+func parallelHashFunc(tree []int, tree_hash uint64, q int, wg *sync.WaitGroup) {
+	for j := 0; j < q; j++ {
+		// fmt.Println(i)
+		wg.Add(1)
+		hashFunc(tree, tree_hash, wg)
 
-
-
-
+	}
 }
 
 func compareTrees(tree1 []int, tree2 []int) bool {
@@ -217,14 +219,8 @@ func main() {
 	c2 := 0
 	for i := 0; i < 1; i++ {
 		partition := trees_partitions[i]
-		// go func() {
-			for j := 0; j < q; j++ {
-				fmt.Println(i)
-				wg.Add(1)
-				hashFunc(partition[j], &tree_hashes[c2], &wg)
-				c2++;
-			}
-		// }()
+		go parallelHashFunc(partition[j], &tree_hashes[c2], q, &wg)
+		c2++
 	}
 
 	wg.Wait()
