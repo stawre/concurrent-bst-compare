@@ -18,7 +18,7 @@ type node struct {
 	right *node
 }
 
-func nodeConstruct (value int) *node {
+func nodeConstruct(value int) *node {
 	my_node := new(node)
 	my_node.value = value
 	my_node.left = nil
@@ -32,7 +32,7 @@ func inOrderTraversal(tree []int) []int {
 	root = makeBTree(tree, root, retval)
 
 	computeInOrder(root, &retval)
-	
+
 	return retval
 }
 
@@ -93,6 +93,13 @@ func hashFunc(tree []int, hashI *uint64, wg *sync.WaitGroup) {
 	*hashI = retval
 
 	wg.Done()
+}
+
+func parallelHashFunc(trees [][]int, tree_hashes []uint64, q int, r int, hashWorkers int) {
+
+
+
+
 }
 
 func compareTrees(tree1 []int, tree2 []int) bool {
@@ -183,8 +190,39 @@ func main() {
 
 	/* Thread pool implementation */
 	// for i := 0; i < *hashWorkers; i++ {
-	// 	go hashFunc(trees[i], &tree_hashes[i], &wg)
+	// 	go parallelHashFunc(trees[i], &tree_hashes[i], &wg)
 	// }
+
+	q := tree_size / *hashWorkers
+	r := tree_size % *hashWorkers
+
+	trees_partitions := make([][][]int, hashWorkers)
+	for i := range trees_partitions {
+		trees_partitions[i] = make([][]int, q)
+		for j := range trees_partitions[i] {
+			trees_partitions[i][j] = make([]int, len(trees[0]))
+		}
+	}
+
+	counter := 0
+	for i := 0; i < *hashWorkers; i++ {
+		for j := 0; j < q; j++ {
+			for k := 0; k < tree_dim; k++ {
+				trees_partitions[i][j][k] = trees[counter][k]
+			}
+			counter++
+		}
+	}
+
+	c2 := 0
+	for i := 0; i < *hashWorkers; i++ {
+		go func(trees_partitions[i] interface{}) {
+			for j := 0; j < q; j++ {
+				hashFunc(trees_partitions[i][j], &tree_hashes[c2])
+				c2++;
+			}
+		}
+	}
 
 	for i := 0; i < tree_size; i++ {
 		for j := 0; j < tree_size; j++ {
