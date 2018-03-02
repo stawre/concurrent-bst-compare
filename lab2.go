@@ -239,6 +239,8 @@ func main() {
 		// go hashFunc(trees[i], &tree_hashes[i], &wg)
 		hashFunc(trees[i], &tree_hashes[i])
 	}
+
+	elapsed1 := time.Since(start1)
 	//
 	// wg.Wait()
 	//
@@ -294,7 +296,7 @@ func main() {
 		// 	hash_map[my_element.hash] = append(hash_map[my_element.hash], my_element.bst_id)
 		// }
 	 // }(my_chan)
-
+	start2 := time.Now()
 	for i := 0; i < tree_size; i++ {
 		for j := 0; j < tree_size; j++ {
 			if (tree_hashes[i] == tree_hashes[j]) {
@@ -306,6 +308,7 @@ func main() {
 			}
 		}
 	}
+	elapsed2 := time.Since(start2)
 	// var wg1 sync.WaitGroup
 	// my_buffer := make(chan tree_pair)
 	// my_cond = sync.NewCond(&mux)
@@ -340,9 +343,9 @@ func main() {
 	// }
 	//
 	// wg1.Wait()
-	elapsed1 := time.Since(start1)
 
-	fmt.Printf("Time taken by 1: %s\n", elapsed1)
+
+	fmt.Printf("Time taken by 1: %s, Time taken by 2: %s\n", elapsed1, elapsed2)
 
 	// elapsed := time.Since(start)
 
