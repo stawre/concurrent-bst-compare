@@ -318,7 +318,7 @@ func main() {
 						for buffer_counter == *compWorkers {
 							my_cond.Wait()
 						}
-						my_buffer <- tree_pair{bst_id1: id1, bst_id2: id2}
+						*my_buffer <- tree_pair{bst_id1: id1, bst_id2: id2}
 						buffer_counter++
 					}
 				}
