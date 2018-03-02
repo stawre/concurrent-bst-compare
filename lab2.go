@@ -196,8 +196,8 @@ func main() {
 		inOrderTrees[i] = inOrderTraversal(trees[i])
 	}
 
-	tree_hashes := make([]uint64, tree_size)
-	tree_map := make(map[int][]int)
+	// tree_hashes := make([]uint64, tree_size)
+	// tree_map := make(map[int][]int)
 
 	var wg sync.WaitGroup
 	equality := make([][]bool, tree_size)
@@ -261,9 +261,9 @@ func main() {
 	hash_map := make(map[uint64][]int)
 
 	 go func (my_chan chan map_element){
-	 	for my_element := range my_chan {
-	 		hash_map[my_element.hash] = append(hash_map[my_element.hash], my_element.bst_id)
-	 	}
+		for my_element := range my_chan {
+			hash_map[my_element.hash] = append(hash_map[my_element.hash], my_element.bst_id)
+		}
 	 }(my_chan)
 
 	// for i := 0; i < tree_size; i++ {
