@@ -129,15 +129,14 @@ func parallelHashFunc(partition *[][]int, q int, wg *sync.WaitGroup, i int) {
 	}
 }
 
-func compareTrees(tree1 []int, tree2 []int) bool {
-
+func compareTrees(tree1 []int, tree2 []int, wg *sync.WaitGroup) bool {
 	size := len(tree1)
 	for i := 0; i < size; i++ {
 		if (tree1[i] != tree2[i]) {
 			return false
 		}
 	}
-
+	wg.Done()
 	return true
 }
 
@@ -262,6 +261,7 @@ func main() {
 		c2++
 	}
 
+	wg.Wait()
 	// hash_map := make(map[uint64][]int)
 
 	 // go func (my_chan chan map_element){
@@ -280,6 +280,7 @@ func main() {
 	// 		}
 	// 	}
 	// }
+	var wg1 sync.WaitGroup
 
 	for elem := range hash_map {
 		temp := hash_map[elem]
@@ -287,7 +288,8 @@ func main() {
 		if (n > 1) {
 			for id := range temp {
 				for id2 := range temp {
-					if compareTrees(inOrderTrees[id], inOrderTrees[id2]) {
+					wg1.Add(1)
+					if go compareTrees(inOrderTrees[id], inOrderTrees[id2], &wg1) {
 						equality[id][id2] = true
 					}
 				}
@@ -297,8 +299,7 @@ func main() {
 		}
 	}
 
-	wg.Wait()
-
+	wg1.Wait()
 	elapsed1 := time.Since(start1)
 
 	fmt.Printf("Time taken by 1: %s\n", elapsed1)
