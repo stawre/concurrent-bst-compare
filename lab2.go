@@ -92,7 +92,7 @@ func hash(hash uint64, val int) uint64 {
 }
 
 // func hashFunc(tree []int, my_chan *chan map_element, bst_id int) {
-func hashFunc(tree []int, hashI *uint64) {
+func hashFunc(tree []int, hashI *uint64, wg *sync.WaitGroup) {
 	var retval uint64 = 0
 	tree_len := len(tree)
 	for i := 0; i < tree_len; i++ {
@@ -106,10 +106,10 @@ func hashFunc(tree []int, hashI *uint64) {
 	// hash_map[retval] = append(hash_map[retval], bst_id)
 	// mux.Unlock()
 
-	// wg.Done()
+	wg.Done()
 }
 
-func parallelHashFunc(partition *[][]int, q int, tree_hash *uint64, wg *sync.WaitGroup,) {
+/*func parallelHashFunc(partition *[][]int, q int, tree_hash *uint64, wg *sync.WaitGroup) {
 // func parallelHashFunc(partition [][]int, q int, wg *sync.WaitGroup, i int) {
 
 	// fmt.Println(q)
@@ -124,7 +124,7 @@ func parallelHashFunc(partition *[][]int, q int, tree_hash *uint64, wg *sync.Wai
 			wg.Done()
 		}
 	}
-}
+}*/
 
 func compareTrees(tree1 []int, tree2 []int) bool {
 
