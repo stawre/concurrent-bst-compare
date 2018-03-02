@@ -133,7 +133,7 @@ func compareTrees(tree1 []int, tree2 []int, wg *sync.WaitGroup, retval *bool) {
 	size := len(tree1)
 	for i := 0; i < size; i++ {
 		if (tree1[i] != tree2[i]) {
-			return false
+			*retval = false
 		}
 	}
 	wg.Done()
