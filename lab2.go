@@ -138,7 +138,7 @@ func parallelHashFunc(partition *[][]int, q int, wg *sync.WaitGroup, i int) {
 	}
 }
 
-func compareTrees(tree1 []int, tree2 []int, wg *sync.WaitGroup) {
+func compareTrees(tree1 []int, tree2 []int, wg *sync.WaitGroup) bool {
 	size := len(tree1)
 	for i := 0; i < size; i++ {
 		if (tree1[i] != tree2[i]) {
@@ -153,10 +153,10 @@ func compareTrees(tree1 []int, tree2 []int, wg *sync.WaitGroup) {
 
 func parallelCompareTrees(my_buffer *chan tree_pair, wg *sync.WaitGroup) {
 	for buffer_counter > 0 {
-		my_pair := <- my_buffer
+		my_pair := <- *my_buffer
 		buffer_counter--
 		my_cond.Signal()
-		if compareTrees(inOrderTrees[my_pair.bst_id1], inOrderTrees[my_pair.bst_id2]) {
+		if compareTrees(inOrderTrees[my_pair.bst_id1], inOrderTrees[my_pair.bst_id2], wg) {
 			equality[my_pair.bst_id1][my_pair.bst_id2] = true
 		}
 	}
@@ -304,7 +304,7 @@ func main() {
 	// 	}
 	// }
 	var wg1 sync.WaitGroup
-	my_buffer := make(chan tree_pair, *compWorkers)
+	my_buffer := make(chan tree_pair)
 	my_cond = sync.NewCond(&mux)
 
 	go func (my_buffer *chan tree_pair) {
