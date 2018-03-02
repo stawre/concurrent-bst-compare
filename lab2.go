@@ -129,7 +129,7 @@ func parallelHashFunc(partition *[][]int, q int, wg *sync.WaitGroup, i int) {
 	}
 }
 
-func compareTrees(tree1 []int, tree2 []int, wg *sync.WaitGroup) bool {
+func compareTrees(tree1 []int, tree2 []int, wg *sync.WaitGroup, retval *bool) {
 	size := len(tree1)
 	for i := 0; i < size; i++ {
 		if (tree1[i] != tree2[i]) {
@@ -137,7 +137,7 @@ func compareTrees(tree1 []int, tree2 []int, wg *sync.WaitGroup) bool {
 		}
 	}
 	wg.Done()
-	return true
+	*retval = true
 }
 
 func main() {
@@ -289,7 +289,9 @@ func main() {
 			for id := range temp {
 				for id2 := range temp {
 					wg1.Add(1)
-					if go compareTrees(inOrderTrees[id], inOrderTrees[id2], &wg1) {
+					var retval bool
+					go compareTrees(inOrderTrees[id], inOrderTrees[id2], &wg1, &retval)
+					if retval {
 						equality[id][id2] = true
 					}
 				}
