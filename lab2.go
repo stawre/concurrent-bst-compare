@@ -24,7 +24,7 @@ type map_element struct {
 }
 
 // var mux sync.Mutex
-// var hash_map = make(map[uint64][]int)
+var hash_map = make(map[uint64][]int)
 
 func nodeConstruct(value int) *node {
 	my_node := new(node)
@@ -91,7 +91,8 @@ func hash(hash uint64, val int) uint64 {
 	return (hash * uint64(val2) + uint64(val2)) % prime
 }
 
-func hashFunc(tree []int, my_chan *chan map_element, bst_id int) {
+func hashFunc(tree []int, bst_id int) {
+// func hashFunc(tree []int, my_chan *chan map_element, bst_id int) {
 // func hashFunc(tree []int, hashI *uint64) {
 	var retval uint64 = 0
 	tree_len := len(tree)
@@ -101,16 +102,17 @@ func hashFunc(tree []int, my_chan *chan map_element, bst_id int) {
 
 	// *hashI = retval
 
-	*my_chan <- map_element{hash: retval, bst_id: bst_id}
-	// mux.Lock()
-	// hash_map[retval] = append(hash_map[retval], bst_id)
-	// mux.Unlock()
+	// *my_chan <- map_element{hash: retval, bst_id: bst_id}
+	mux.Lock()
+	hash_map[retval] = append(hash_map[retval], bst_id)
+	mux.Unlock()
 
 	// wg.Done()
 }
 
+func parallelHashFunc(partition *[][]int, q int, wg *sync.WaitGroup, i int) {
 // func parallelHashFunc(partition *[][]int, q int, tree_hash *uint64, wg *sync.WaitGroup) {
-func parallelHashFunc(partition *[][]int, q int, wg *sync.WaitGroup, my_chan *chan map_element, i int) {
+// func parallelHashFunc(partition *[][]int, q int, wg *sync.WaitGroup, my_chan *chan map_element, i int) {
 
 	// fmt.Println(q)
 	for j := 0; j < q; j++ {
@@ -119,7 +121,8 @@ func parallelHashFunc(partition *[][]int, q int, wg *sync.WaitGroup, my_chan *ch
 
 		bst_id := q*i + j
 
-		hashFunc((*partition)[j], my_chan, bst_id)
+		hashFunc((*partition)[j], bst_id)
+		// hashFunc((*partition)[j], my_chan, bst_id)
 		if (j == q - 1) {
 			wg.Done()
 		}
@@ -248,23 +251,24 @@ func main() {
 
 	start1 := time.Now()
 
-	my_chan := make(chan map_element)
+	// my_chan := make(chan map_element)
 
 	c2 := 0
 	for i := 0; i < *hashWorkers; i++ {
 		wg.Add(1)
 		go parallelHashFunc(&trees_partitions[i], q, &wg, &my_chan, i)
+		go parallelHashFunc(&trees_partitions[i], q, &wg, i)
 		// go parallelHashFunc(partition, q, &tree_hashes[i], &wg, i)
 		c2++
 	}
 
-	hash_map := make(map[uint64][]int)
+	// hash_map := make(map[uint64][]int)
 
-	 go func (my_chan chan map_element){
-		for my_element := range my_chan {
-			hash_map[my_element.hash] = append(hash_map[my_element.hash], my_element.bst_id)
-		}
-	 }(my_chan)
+	 // go func (my_chan chan map_element){
+		// for my_element := range my_chan {
+		// 	hash_map[my_element.hash] = append(hash_map[my_element.hash], my_element.bst_id)
+		// }
+	 // }(my_chan)
 
 	// for i := 0; i < tree_size; i++ {
 	// 	for j := 0; j < tree_size; j++ {
