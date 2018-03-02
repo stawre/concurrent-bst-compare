@@ -99,7 +99,7 @@ func hashFunc(tree []int, my_chan *chan map_element, bst_id int) {
 		retval = hash(retval, tree[i])
 	}
 
-	*hashI = retval
+	// *hashI = retval
 
 	*my_chan <- map_element{hash: retval, bst_id: bst_id}
 	// mux.Lock()
