@@ -23,8 +23,17 @@ type map_element struct {
 	bst_id int
 }
 
+type tree_pair struct {
+	bst_id1 int
+	bst_id2 int
+}
+
 var mux sync.Mutex
 var hash_map = make(map[uint64][]int)
+var buffer_counter int = 0
+var my_cond sync.NewCond(&mux)
+var inOrderTrees [][]int
+var equality [][]bool
 
 func nodeConstruct(value int) *node {
 	my_node := new(node)
@@ -140,6 +149,17 @@ func compareTrees(tree1 []int, tree2 []int, wg *sync.WaitGroup, retval *bool) {
 	*retval = true
 }
 
+func parallelCompareTrees(my_buffer *chan tree_pair, wg *sync.WaitGroup) {
+	while(buffer_counter > 0) {
+		my_pair := <- tree_pair
+		buffer_counter--
+		my_cond.Signal()
+		if compareTrees(inOrderTrees[my_pair.bst_id1], inOrderTrees[my_pair.bst_id2]) {
+			equality[id1][id2] = true
+		}
+	}
+}
+
 func main() {
 	hashWorkers := flag.Int("hash-workers", 1, "hash workers")
 	dataWorkers := flag.Int("data-workers", 1, "data workers")
@@ -188,7 +208,8 @@ func main() {
 
 	tree_size := len(trees)
 	tree_dim := len(trees[0])
-	inOrderTrees := make([][]int, tree_size)
+
+	inOrderTrees = make([][]int, tree_size)
 
 	for i := range inOrderTrees {
 		inOrderTrees[i] = make([]int, tree_dim)
@@ -202,7 +223,7 @@ func main() {
 	// tree_map := make(map[int][]int)
 
 	var wg sync.WaitGroup
-	equality := make([][]bool, tree_size)
+	equality = make([][]bool, tree_size)
 
 	for i := range equality {
 		equality[i] = make([]bool, tree_size)
@@ -252,13 +273,13 @@ func main() {
 
 	// my_chan := make(chan map_element)
 
-	c2 := 0
+	// c2 := 0
 	for i := 0; i < *hashWorkers; i++ {
 		wg.Add(1)
 		// go parallelHashFunc(&trees_partitions[i], q, &wg, &my_chan, i)
 		go parallelHashFunc(&trees_partitions[i], q, &wg, i)
 		// go parallelHashFunc(partition, q, &tree_hashes[i], &wg, i)
-		c2++
+		// c2++
 	}
 
 	wg.Wait()
@@ -281,24 +302,35 @@ func main() {
 	// 	}
 	// }
 	var wg1 sync.WaitGroup
+	my_buffer := make(chan tree_pair, *compWorkers)
 
-	for elem := range hash_map {
-		temp := hash_map[elem]
-		n := len(temp)
-		if (n > 1) {
-			for id := range temp {
-				for id2 := range temp {
-					wg1.Add(1)
-					var retval bool
-					go compareTrees(inOrderTrees[id], inOrderTrees[id2], &wg1, &retval)
-					if retval {
-						equality[id][id2] = true
+	go func (my_buffer *chan tree_pair) {
+		for elem := range hash_map {
+			temp := hash_map[elem]
+			n := len(temp)
+			if (n > 1) {
+				for id1 := range temp {
+					for id2 := range temp {
+						// go compareTrees(inOrderTrees[id1], inOrderTrees[id2], &wg1, &retval)
+						while(buffer_counter == *compWorkers) {
+							my_cond.Wait()
+						}
+						my_buffer <- tree_pair{bst_id1: id1, bst_id2: id2}
+						buffer_counter++
 					}
 				}
+			} else {
+				 equality[temp[0]][temp[0]] = true
 			}
-		} else {
-			 equality[temp[0]][temp[0]] = true
 		}
+	} (&my_buffer)
+
+	for i := 0; i < *compWorkers; i++ {
+		wg1.Add(1)
+		// go parallelHashFunc(&trees_partitions[i], q, &wg, &my_chan, i)
+		go parallelCompareTrees(&my_buffer, &wg1)
+		// go parallelHashFunc(partition, q, &tree_hashes[i], &wg, i)
+		// c2++
 	}
 
 	wg1.Wait()
