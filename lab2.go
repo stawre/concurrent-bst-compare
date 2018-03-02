@@ -225,7 +225,7 @@ func main() {
 	tree_hashes := make([]uint64, tree_size)
 	// tree_map := make(map[int][]int)
 
-	var wg sync.WaitGroup
+	// var wg sync.WaitGroup
 	equality = make([][]bool, tree_size)
 
 	for i := range equality {
