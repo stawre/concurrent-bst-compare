@@ -23,7 +23,7 @@ type map_element struct {
 	bst_id int
 }
 
-// var mux sync.Mutex
+var mux sync.Mutex
 var hash_map = make(map[uint64][]int)
 
 func nodeConstruct(value int) *node {
@@ -256,7 +256,7 @@ func main() {
 	c2 := 0
 	for i := 0; i < *hashWorkers; i++ {
 		wg.Add(1)
-		go parallelHashFunc(&trees_partitions[i], q, &wg, &my_chan, i)
+		// go parallelHashFunc(&trees_partitions[i], q, &wg, &my_chan, i)
 		go parallelHashFunc(&trees_partitions[i], q, &wg, i)
 		// go parallelHashFunc(partition, q, &tree_hashes[i], &wg, i)
 		c2++
