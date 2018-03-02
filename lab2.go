@@ -96,7 +96,7 @@ func hashFunc(tree []int, hashI *uint64) {
 	var retval uint64 = 0
 	tree_len := len(tree)
 	for i := 0; i < tree_len; i++ {
-		retval += hash(retval, tree[i])
+		retval = hash(retval, tree[i])
 	}
 
 	*hashI = retval
@@ -109,7 +109,7 @@ func hashFunc(tree []int, hashI *uint64) {
 	// wg.Done()
 }
 
-func parallelHashFunc(partition [][]int, q int, tree_hash *uint64, wg *sync.WaitGroup,) {
+func parallelHashFunc(partition *[][]int, q int, tree_hash *uint64, wg *sync.WaitGroup,) {
 // func parallelHashFunc(partition [][]int, q int, wg *sync.WaitGroup, i int) {
 
 	// fmt.Println(q)
@@ -251,9 +251,8 @@ func main() {
 
 	c2 := 0
 	for i := 0; i < *hashWorkers; i++ {
-		partition := trees_partitions[i]
 		wg.Add(1)
-		go parallelHashFunc(partition, q, &tree_hashes[i], &wg)
+		go parallelHashFunc(&trees_partitions[i], q, &tree_hashes[i], &wg)
 		// go parallelHashFunc(partition, q, &wg, i)
 		c2++
 	}
@@ -268,7 +267,7 @@ func main() {
 	//  	for my_element := range my_chan {
 	//  		hash_map[my_element.hash] = append(hash_map[my_element.hash], my_element.bst_id)
 	//  	}
-	//  }(my_chan) 
+	//  }(my_chan)
 
 	for i := 0; i < tree_size; i++ {
 		for j := 0; j < tree_size; j++ {
