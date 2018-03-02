@@ -232,7 +232,7 @@ func main() {
 		equality[i] = make([]bool, tree_size)
 	}
 
-	// start1 := time.Now()
+	start1 := time.Now()
 	//
 	for i := 0; i < tree_size; i++ {
 		// wg.Add(1)
