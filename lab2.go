@@ -31,7 +31,7 @@ type tree_pair struct {
 var mux sync.Mutex
 var hash_map = make(map[uint64][]int)
 var buffer_counter int = 0
-var my_cond sync.Cond
+var my_cond *sync.Cond
 var inOrderTrees [][]int
 var equality [][]bool
 
@@ -138,24 +138,26 @@ func parallelHashFunc(partition *[][]int, q int, wg *sync.WaitGroup, i int) {
 	}
 }
 
-func compareTrees(tree1 []int, tree2 []int, wg *sync.WaitGroup, retval *bool) {
+func compareTrees(tree1 []int, tree2 []int, wg *sync.WaitGroup) {
 	size := len(tree1)
 	for i := 0; i < size; i++ {
 		if (tree1[i] != tree2[i]) {
-			*retval = false
+			// *retval = false
+			return false
 		}
 	}
 	wg.Done()
-	*retval = true
+	// *retval = true
+	return true
 }
 
 func parallelCompareTrees(my_buffer *chan tree_pair, wg *sync.WaitGroup) {
 	for buffer_counter > 0 {
-		my_pair := <- tree_pair
+		my_pair := <- my_buffer
 		buffer_counter--
 		my_cond.Signal()
 		if compareTrees(inOrderTrees[my_pair.bst_id1], inOrderTrees[my_pair.bst_id2]) {
-			equality[id1][id2] = true
+			equality[my_pair.bst_id1][my_pair.bst_id2] = true
 		}
 	}
 }
