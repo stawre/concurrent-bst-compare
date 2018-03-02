@@ -206,18 +206,24 @@ func main() {
 		equality[i] = make([]bool, tree_size)
 	}
 
-	// for i := 0; i < tree_size; i++ {
-	// 	wg.Add(1)
-	// 	go hashFunc(trees[i], &tree_hashes[i], &wg)
-	// }
+	start1 := time.Now()
 
-	// wg.Wait()
+	for i := 0; i < tree_size; i++ {
+		wg.Add(1)
+		go hashFunc(trees[i], &tree_hashes[i], &wg)
+	}
+
+	wg.Wait()
+
+	elapsed1 := time.Since(start1)
+	fmt.Printf("Time taken by 1: %s\n", elapsed1)
 
 	/* Thread pool implementation */
 	// for i := 0; i < *hashWorkers; i++ {
 	//	 go hashFunc(trees[i], &tree_hashes[i], &wg)
 	// }
 
+	/*
 	q := tree_size / *hashWorkers
 	// fmt.Println(q)
 	r := tree_size % *hashWorkers
@@ -258,8 +264,8 @@ func main() {
 	}
 
 	wg.Wait()
-	elapsed1 := time.Since(start1)
-	fmt.Printf("Time taken by 1: %s\n", elapsed1)
+	*/
+
 	// hash_map := make(map[uint64][]int)
 
 	//  go func (my_chan chan map_element){
