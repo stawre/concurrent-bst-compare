@@ -119,7 +119,7 @@ func parallelHashFunc(partition *[][]int, q int, tree_hash *uint64, wg *sync.Wai
 
 		// bst_id := q*i + j
 
-		hashFunc(partition[j], tree_hash)
+		hashFunc((*partition)[j], tree_hash)
 		if (j == q - 1) {
 			wg.Done()
 		}
@@ -182,7 +182,7 @@ func main() {
 		tree_index++
 	}
 
-	start := time.Now()
+	// start := time.Now()
 
 	tree_size := len(trees)
 	tree_dim := len(trees[0])
@@ -245,7 +245,7 @@ func main() {
 		counter++
 	}
 
-	// start1 := time.Now()
+	start1 := time.Now()
 
 	// my_chan := make(chan map_element)
 
@@ -257,10 +257,9 @@ func main() {
 		c2++
 	}
 
-	// elapsed1 := time.Since(start1)
-
 	wg.Wait()
-
+	elapsed1 := time.Since(start1)
+	fmt.Printf("Time taken by 1: %s\n", elapsed1)
 	// hash_map := make(map[uint64][]int)
 
 	//  go func (my_chan chan map_element){
@@ -306,13 +305,13 @@ func main() {
 
 
 
-	elapsed := time.Since(start)
+	// elapsed := time.Since(start)
 
 	// for i := 0; i < 10; i++ {
 	// 	fmt.Println(equality[i])
 	// }
 
 	// fmt.Printf("Time taken by 1: %s, Time taken by 2: %s\n", elapsed1, elapsed)
-	fmt.Printf("Time taken by 1: %s", elapsed)
+	fmt.Printf("Time taken by 1: %s\n", elapsed1)
 
 }
